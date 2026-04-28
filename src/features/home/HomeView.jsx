@@ -77,6 +77,7 @@ const supportedSections = new Set([
   'location',
   'alarm-logs',
   'error-logs',
+  'auth-logs',
   'commands',
   'replies',
   'webhooks'
@@ -517,6 +518,8 @@ export default function HomeView({
   const [alarmLogsStatus, setAlarmLogsStatus] = useState('')
   const [errorLogs, setErrorLogs] = useState([])
   const [errorLogsStatus, setErrorLogsStatus] = useState('')
+  const [authLogs, setAuthLogs] = useState([])
+  const [authLogsStatus, setAuthLogsStatus] = useState('')
   const [errorLogRange, setErrorLogRange] = useState('24h')
   const [errorLogCompanyFilter, setErrorLogCompanyFilter] = useState('all')
   const [errorLogLocationFilter, setErrorLogLocationFilter] = useState('all')
@@ -1100,6 +1103,21 @@ export default function HomeView({
     }
   }, [asCollection, fetchJson])
 
+
+  const loadAuthLogs = useCallback(async () => {
+    setAuthLogsStatus('Loading authentication logs...')
+    try {
+      const payload = await fetchJson('/api/auth/logs', { headers: {} })
+      const rows = asCollection(payload, ['authLogs', 'logs'])
+      const sortedRows = [...rows].sort((a, b) => new Date(b.occurredAt || b.createdAt || b.loggedAt || 0).getTime() - new Date(a.occurredAt || a.createdAt || a.loggedAt || 0).getTime())
+      setAuthLogs(sortedRows)
+      setAuthLogsStatus(sortedRows.length ? `${sortedRows.length} authentication log entr${sortedRows.length === 1 ? 'y' : 'ies'}.` : 'No authentication logs recorded yet.')
+    } catch (error) {
+      setAuthLogs([])
+      setAuthLogsStatus(`Failed to load authentication logs: ${error.message}`)
+    }
+  }, [asCollection, fetchJson])
+
   const loadLocationBreadcrumbs = useCallback(async (deviceId) => {
     if (!deviceId) {
       setLocationBreadcrumbs([])
@@ -1131,6 +1149,7 @@ export default function HomeView({
           activeSection === 'devices' ||
           activeSection === 'alarm-logs' ||
           activeSection === 'error-logs' ||
+          activeSection === 'auth-logs' ||
           isDeviceDetailSection(activeSection)
 
         if (needsLookups) await loadLookups()
@@ -1143,6 +1162,7 @@ export default function HomeView({
           await Promise.all([loadCompanies(), loadUsers(), loadLocations(), loadDevices(), loadErrorLogs()])
         }
         if (activeSection === 'error-logs') await loadErrorLogs()
+        if (activeSection === 'auth-logs') await loadAuthLogs()
         if (activeSection === 'user-detail' || activeSection === 'location-detail') {
           await loadDevices()
         }
@@ -1153,7 +1173,7 @@ export default function HomeView({
     }
 
     load()
-  }, [activeSection, loadCompanies, loadUsers, loadLocations, loadDevices, loadLookups, loadErrorLogs])
+  }, [activeSection, loadCompanies, loadUsers, loadLocations, loadDevices, loadLookups, loadErrorLogs, loadAuthLogs])
 
   useEffect(() => {
     if (activeSection !== 'replies' || !autoFetchReplies) return undefined
@@ -4619,6 +4639,49 @@ export default function HomeView({
                     )) : (
                       <tr>
                         <td colSpan={6}>No backend errors found for this filter.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+        )}
+
+
+        {activeSection === 'auth-logs' && (
+          <section className="section-panel error-logs-panel">
+            <h2 className="page-title">Auth Logs</h2>
+            <article className="card-like error-logs-card">
+              <div className="section-head error-log-head">
+                <button className="mini-action" type="button" onClick={loadAuthLogs}>Refresh</button>
+              </div>
+              <p className="status">{authLogsStatus}</p>
+              <div className="table-wrap error-log-table-wrap">
+                <table className="data-table error-log-table">
+                  <thead>
+                    <tr>
+                      <th>Occurred At</th>
+                      <th>User</th>
+                      <th>Action</th>
+                      <th>Status</th>
+                      <th>IP</th>
+                      <th>Message</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {authLogs.length ? authLogs.map((entry) => (
+                      <tr key={entry.id || `${entry.occurredAt || entry.createdAt || ''}-${entry.userId || entry.email || ''}`}>
+                        <td>{entry.occurredAt || entry.createdAt || entry.loggedAt ? new Date(entry.occurredAt || entry.createdAt || entry.loggedAt).toLocaleString() : '-'}</td>
+                        <td>{entry.email || entry.username || entry.userId || '-'}</td>
+                        <td>{entry.action || entry.event || '-'}</td>
+                        <td>{entry.status || entry.result || '-'}</td>
+                        <td>{entry.ipAddress || entry.ip || '-'}</td>
+                        <td>{entry.message || entry.note || '-'}</td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={6}>No authentication logs found.</td>
                       </tr>
                     )}
                   </tbody>

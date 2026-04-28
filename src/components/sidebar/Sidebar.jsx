@@ -13,6 +13,7 @@ const operationsGroup = {
     { id: 'bulk-sim', label: 'Bulk SIM', icon: 'settings', superAdminOnly: true },
     { id: 'alarm-logs', label: 'Alarm Logs', icon: 'clock' },
     { id: 'error-logs', label: 'Error Logs', icon: 'warning' },
+    { id: 'auth-logs', label: 'Auth Logs', icon: 'clock' },
     { id: 'replies', label: 'Replies', icon: 'replies' },
     { id: 'webhooks', label: 'Webhook Events', icon: 'webhook' }
   ]
