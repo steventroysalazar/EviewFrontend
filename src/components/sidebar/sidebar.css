@@ -1,0 +1,146 @@
+.sidebar-panel {
+  border: 1px solid #2d3457;
+  border-radius: 0;
+  background: #232c4d;
+  padding: 0.75rem 0.7rem 0.9rem;
+  min-height: 0;
+  height: 97%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  align-self: stretch;
+  overflow: hidden;
+}
+
+.sidebar-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.15rem;
+  padding-bottom: 0.5rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.sidebar-group {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.sidebar-group-title {
+  margin: 0.2rem 0 0.72rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7483aa;
+  padding-left: 0.62rem;
+}
+
+.sidebar-nav,
+.sidebar-subnav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.sidebar-subnav {
+  margin: 0.2rem 0 0.5rem 2rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.sidebar-nav a,
+.sidebar-subnav a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.58rem 0.72rem;
+  color: #afb7ca;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.03rem;
+  border: 1px solid transparent;
+}
+
+.sidebar-nav a.active {
+  background: #5a79c9;
+  border-color: #5a79c9;
+  color: #f7fbff;
+}
+
+.sidebar-subnav a {
+  color: #95a0ba;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.8rem;
+}
+
+.sidebar-subnav a.sub-active {
+  font-weight: 800;
+  color: #e4ebf8;
+}
+
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: currentColor;
+  opacity: 0.95;
+}
+
+.logout-link {
+  margin-top: auto;
+  margin-left: 0.62rem;
+  align-self: flex-start;
+  justify-content: flex-start;
+  background: transparent;
+  color: #e44949;
+  padding: 0.34rem 0;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0;
+  position: static;
+  flex-shrink: 0;
+}
+
+.logout-link .nav-icon {
+  color: #e44949;
+}
+
+@media (max-width: 980px) {
+  .sidebar-panel {
+    position: static;
+    height: auto;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
+    border-radius: 16px;
+  }
+
+  .sidebar-scroll {
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .logout-link {
+    margin-top: 0.7rem;
+  }
+}

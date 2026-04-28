@@ -1,0 +1,7 @@
+.auth-layout-card-register .register-view {
+  max-width: none;
+}
+
+.register-view .auth-submit {
+  margin-top: 0.8rem;
+}
