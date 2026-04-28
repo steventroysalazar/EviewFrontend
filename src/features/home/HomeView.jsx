@@ -3451,38 +3451,87 @@ export default function HomeView({
                   </article>
                 </section>
 
-                <section className="dashboard-top-layout">
-                  <article className="card-like superadmin-map-panel">
-                    <div className="map-panel-head">
-                      <div>
-                        <h3>Live Device Location Overview</h3>
-                        <p>Shows devices with active alerts. Click an alert card to focus the map on that device.</p>
-                      </div>
-                      <div className="map-kpi-stack">
-                        <span className="map-kpi-chip">
-                          <strong>{activeAlarmLocations.length}</strong>
-                          <small>Alert devices on map</small>
-                        </span>
-                        <span className="map-kpi-chip">
-                          <strong>{activeAlarmLocations[0]?.updatedAt ? new Date(activeAlarmLocations[0].updatedAt).toLocaleString() : '—'}</strong>
-                          <small>Freshest update</small>
-                        </span>
-                      </div>
-                    </div>
-                    {activeAlarmLocations.length ? (
-                      <div className="dashboard-map-layout">
-                        <div className="map-placeholder map-square dashboard-live-map">
-                          {leafletReady ? <div ref={dashboardLeafletRef} className="leaflet-map" /> : <span className="map-chip">Loading map…</span>}
+                <section className="dashboard-operations-layout">
+                  <div className="dashboard-operations-main">
+                    <article className="card-like superadmin-map-panel">
+                      <div className="map-panel-head">
+                        <div>
+                          <h3>Live Device Location Overview</h3>
+                          <p>Shows devices with active alerts. Click an alert card to focus the map on that device.</p>
+                        </div>
+                        <div className="map-kpi-stack">
+                          <span className="map-kpi-chip">
+                            <strong>{activeAlarmLocations.length}</strong>
+                            <small>Alert devices on map</small>
+                          </span>
+                          <span className="map-kpi-chip">
+                            <strong>{activeAlarmLocations[0]?.updatedAt ? new Date(activeAlarmLocations[0].updatedAt).toLocaleString() : '—'}</strong>
+                            <small>Freshest update</small>
+                          </span>
                         </div>
                       </div>
-                    ) : (
-                      <div className="map-placeholder map-square">
-                        <span className="map-chip">No active alert locations to map yet.</span>
-                      </div>
-                    )}
-                  </article>
+                      {activeAlarmLocations.length ? (
+                        <div className="dashboard-map-layout">
+                          <div className="map-placeholder map-square dashboard-live-map">
+                            {leafletReady ? <div ref={dashboardLeafletRef} className="leaflet-map" /> : <span className="map-chip">Loading map…</span>}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="map-placeholder map-square">
+                          <span className="map-chip">No active alert locations to map yet.</span>
+                        </div>
+                      )}
+                    </article>
 
-                  <aside className="active-alerts card-like">
+                    <article className="device-overview card-like">
+                      <h3>Device List</h3>
+                      <div className="table-controls">
+                        <input
+                          placeholder="Search device, owner, role, location..."
+                          value={dashboardDeviceSearch}
+                          onChange={(event) => setDashboardDeviceSearch(event.target.value)}
+                        />
+                        <select value={dashboardDeviceAlertFilter} onChange={(event) => setDashboardDeviceAlertFilter(event.target.value)}>
+                          <option value="all">All devices</option>
+                          <option value="active">Active alerts only</option>
+                          <option value="inactive">No active alerts</option>
+                          {dashboardAlertCodeOptions.map((alarmCode) => (
+                            <option key={`dashboard-alert-code-${alarmCode}`} value={`code:${alarmCode}`}>
+                              {alarmCode}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="table-shell dashboard-device-table">
+                        <table className="data-table">
+                          <thead><tr><th>Device</th><th>Alarm</th><th>Owner</th><th>Role</th><th>Location</th></tr></thead>
+                          <tbody>
+                            {paginatedDashboardDevices.map((device) => {
+                              const meta = resolveDeviceMeta(device)
+                              const alarmMeta = getAlarmMeta(resolveLiveAlarmCode(device))
+                              return (
+                                <tr key={device.id || device.phoneNumber || device.name}>
+                                  <td>{device.name || device.deviceName || '-'}</td>
+                                  <td><span className={`alarm-pill alarm-pill-${alarmMeta.tone}`}>{alarmMeta.label}</span></td>
+                                  <td>{meta.ownerName}</td>
+                                  <td>{meta.ownerRole}</td>
+                                  <td>{meta.ownerLocation}</td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="table-pagination">
+                        <button type="button" className="table-link action-chip action-chip-neutral" disabled={dashboardDevicePage <= 1} onClick={() => setDashboardDevicePage((prev) => Math.max(prev - 1, 1))}>Prev</button>
+                        <span>Page {dashboardDevicePage} of {dashboardTotalPages}</span>
+                        <button type="button" className="table-link action-chip action-chip-neutral" disabled={dashboardDevicePage >= dashboardTotalPages} onClick={() => setDashboardDevicePage((prev) => Math.min(prev + 1, dashboardTotalPages))}>Next</button>
+                      </div>
+                    </article>
+                  </div>
+
+                  <aside className="dashboard-operations-side">
+                    <section className="active-alerts card-like">
                     <div className="section-head">
                       <div className="active-alerts-title">
                         <h3>Active Alerts</h3>
@@ -3530,73 +3579,25 @@ export default function HomeView({
                       <span>Page {activeAlertPage} of {activeAlertTotalPages}</span>
                       <button type="button" className="table-link action-chip action-chip-neutral" disabled={activeAlertPage >= activeAlertTotalPages} onClick={() => setActiveAlertPage((prev) => Math.min(prev + 1, activeAlertTotalPages))}>Next</button>
                     </div>
-                  </aside>
-                </section>
-
-                <section className="dashboard-main-grid">
-                  <article className="device-overview card-like">
-                    <h3>Device List</h3>
-                    <div className="table-controls">
-                      <input
-                        placeholder="Search device, owner, role, location..."
-                        value={dashboardDeviceSearch}
-                        onChange={(event) => setDashboardDeviceSearch(event.target.value)}
-                      />
-                      <select value={dashboardDeviceAlertFilter} onChange={(event) => setDashboardDeviceAlertFilter(event.target.value)}>
-                        <option value="all">All devices</option>
-                        <option value="active">Active alerts only</option>
-                        <option value="inactive">No active alerts</option>
-                        {dashboardAlertCodeOptions.map((alarmCode) => (
-                          <option key={`dashboard-alert-code-${alarmCode}`} value={`code:${alarmCode}`}>
-                            {alarmCode}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="table-shell dashboard-device-table">
-                      <table className="data-table">
-                        <thead><tr><th>Device</th><th>Alarm</th><th>Owner</th><th>Role</th><th>Location</th></tr></thead>
-                        <tbody>
-                          {paginatedDashboardDevices.map((device) => {
-                            const meta = resolveDeviceMeta(device)
-                            const alarmMeta = getAlarmMeta(resolveLiveAlarmCode(device))
-                            return (
-                              <tr key={device.id || device.phoneNumber || device.name}>
-                                <td>{device.name || device.deviceName || '-'}</td>
-                                <td><span className={`alarm-pill alarm-pill-${alarmMeta.tone}`}>{alarmMeta.label}</span></td>
-                                <td>{meta.ownerName}</td>
-                                <td>{meta.ownerRole}</td>
-                                <td>{meta.ownerLocation}</td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className="table-pagination">
-                      <button type="button" className="table-link action-chip action-chip-neutral" disabled={dashboardDevicePage <= 1} onClick={() => setDashboardDevicePage((prev) => Math.max(prev - 1, 1))}>Prev</button>
-                      <span>Page {dashboardDevicePage} of {dashboardTotalPages}</span>
-                      <button type="button" className="table-link action-chip action-chip-neutral" disabled={dashboardDevicePage >= dashboardTotalPages} onClick={() => setDashboardDevicePage((prev) => Math.min(prev + 1, dashboardTotalPages))}>Next</button>
-                    </div>
-                  </article>
-
-                  <aside className="action-stack card-like dashboard-status-panel">
-                    <h3>System Pulse</h3>
-                    <p>Keep an eye on feed health and latest incoming alarm events.</p>
-                    <div className="dashboard-status-items">
-                      <div>
-                        <strong>{alarmStreamConnected ? 'Connected' : 'Reconnecting'}</strong>
-                        <span>Alarm stream state</span>
+                    </section>
+                    <section className="action-stack card-like dashboard-status-panel">
+                      <h3>System Pulse</h3>
+                      <p>Keep an eye on feed health and latest incoming alarm events.</p>
+                      <div className="dashboard-status-items">
+                        <div>
+                          <strong>{alarmStreamConnected ? 'Connected' : 'Reconnecting'}</strong>
+                          <span>Alarm stream state</span>
+                        </div>
+                        <div>
+                          <strong>{alarmFeed.length}</strong>
+                          <span>Recent feed events</span>
+                        </div>
+                        <div>
+                          <strong>{activeAlarmDevices.length}</strong>
+                          <span>Devices with active alerts</span>
+                        </div>
                       </div>
-                      <div>
-                        <strong>{alarmFeed.length}</strong>
-                        <span>Recent feed events</span>
-                      </div>
-                      <div>
-                        <strong>{activeAlarmDevices.length}</strong>
-                        <span>Devices with active alerts</span>
-                      </div>
-                    </div>
+                    </section>
                   </aside>
                 </section>
               </>

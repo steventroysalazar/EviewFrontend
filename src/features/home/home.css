@@ -3616,3 +3616,33 @@ input,select,textarea { background: #f5f6f7; border: 1px solid #d7dade; border-r
   align-items: center;
   justify-content: center;
 }
+
+/* Dashboard layout migration: keep theme, update structure */
+.dashboard-operations-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.dashboard-operations-main {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.dashboard-operations-side {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+}
+
+.dashboard-operations-side .active-alerts,
+.dashboard-operations-side .dashboard-status-panel {
+  margin: 0;
+}
+
+@media (max-width: 1180px) {
+  .dashboard-operations-layout {
+    grid-template-columns: 1fr;
+  }
+}
